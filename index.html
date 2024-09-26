@@ -42,23 +42,9 @@
             alert("화면 캡처가 감지되었습니다. 보안상의 이유로 허용되지 않습니다.");
         }
 
-        // 포커스가 다른 창으로 넘어갔을 때만 감지
-        window.addEventListener('blur', function() {
-            if (document.hasFocus()) return; // 현재 창이 포커스를 잃지 않았을 때만 실행
-
-            // GA에 이벤트 전송
-            gtag('event', 'window_blur', {
-                'event_category': 'User Interaction',
-                'event_label': 'Window Lost Focus'
-            });
-
-            // 캡처 시도를 방해하기 위해 경고창 띄우기
-            showAlertWarning();
-        });
-
-        // 키보드 이벤트 감지 (PrintScreen 또는 캡처 시도 시)
+        // PrintScreen 또는 캡처 관련 키 입력 감지
         document.addEventListener('keydown', function(event) {
-            if (event.key === 'PrintScreen' || event.key === 'Print' || event.key === 'Snapshot' || (event.ctrlKey && event.key === 'p') || (event.metaKey && event.key === 'p')) {
+            if (event.key === 'PrintScreen' || event.key === 'Snapshot' || (event.ctrlKey && event.key === 'p') || (event.metaKey && event.key === 'p')) {
                 // GA에 이벤트 전송
                 gtag('event', 'screen_capture_attempt', {
                     'event_category': 'User Interaction',
@@ -67,6 +53,31 @@
 
                 // 캡처 시도를 방해하기 위해 경고창 띄우기
                 showAlertWarning();
+            }
+        });
+
+        // 포커스가 다른 창으로 넘어갔을 때 감지 (단순한 포커스 변화에 대한 경고 없음)
+        window.addEventListener('blur', function() {
+            if (document.hasFocus()) return; // 현재 창이 포커스를 잃지 않았을 때는 아무것도 하지 않음
+
+            // GA에 이벤트 전송 (포커스 변화 기록)
+            gtag('event', 'window_blur', {
+                'event_category': 'User Interaction',
+                'event_label': 'Window Lost Focus'
+            });
+        });
+
+        window.addEventListener('visibilitychange', function() {
+            if (document.hidden) {
+
+            // 사용자가 다른 앱으로 넘어갔을 때 발생
+            gtag('event', 'window_hidden', {
+                'event_category': 'User Interaction',
+                'event_label': 'Window Hidden on Mobile'
+        });
+
+            // 화면 캡처를 방해하는 추가적인 행동
+            alert('다른 앱으로 이동 중입니다. 화면 캡처가 감지될 수 있습니다.');
             }
         });
     </script>
